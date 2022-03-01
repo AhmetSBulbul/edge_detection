@@ -92,6 +92,23 @@ private fun findContours(src: Mat): ArrayList<MatOfPoint> {
     Imgproc.dilate(cannedImage, dilate, kernel)
     val contours = ArrayList<MatOfPoint>()
     val hierarchy = Mat()
+
+    /* ## quote from OpenCV docs ##
+    src: https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html
+    ## CONTOUR APPROXIMATION METHOD
+    This is the third argument in cv.findContours function. What does it denote actually?
+
+    Above, we told that contours are the boundaries of a shape with same intensity. It stores the (x,y) coordinates of the boundary of a shape.
+    But does it store all the coordinates ? That is specified by this contour approximation method.
+
+    If you pass cv.CHAIN_APPROX_NONE, all the boundary points are stored. But actually do we need all the points? For eg, you found the contour of a straight line.
+    Do you need all the points on the line to represent that line? No, we need just two end points of that line. This is what cv.CHAIN_APPROX_SIMPLE does.
+    It removes all redundant points and compresses the contour, thereby saving memory.
+
+    Below image of a rectangle demonstrate this technique. Just draw a circle on all the coordinates in the contour array (drawn in blue color).
+    First image shows points I got with cv.CHAIN_APPROX_NONE (734 points) and second image shows the one with cv.CHAIN_APPROX_SIMPLE (only 4 points).
+    See, how much memory it saves!!!
+    */
     Imgproc.findContours(
             dilate,
             contours,
@@ -114,6 +131,7 @@ private fun getCorners(contours: ArrayList<MatOfPoint>, size: Size): Corners? {
         in 0..5 -> contours.size - 1
         else -> 4
     }
+    //
     for (index in 0..contours.size) {
         if (index in 0..indexTo) {
             val c2f = MatOfPoint2f(*contours[index].toArray())
